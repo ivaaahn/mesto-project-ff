@@ -2,10 +2,14 @@ const cardTemplateContent = document.querySelector("#card-template").content
 
 function createCard(cardData, deleteCallback) {
     const cardElement = cardTemplateContent.querySelector(".card").cloneNode(true)
+    const cardTitleElement = cardElement.querySelector(".card__title")
+    const cardImageElement = cardElement.querySelector(".card__image")
+    const cardDeleteButtonElement = cardElement.querySelector(".card__delete-button")
 
-    cardElement.querySelector(".card__image").src = cardData.link
-    cardElement.querySelector(".card__title").textContent = cardData.name
-    cardElement.querySelector(".card__delete-button").addEventListener('click', deleteCallback)
+    cardImageElement.src = cardData.link
+    cardImageElement.alt = cardData.name
+    cardTitleElement.textContent = cardData.name
+    cardDeleteButtonElement.addEventListener('click', deleteCallback)
     return cardElement
 }
 
