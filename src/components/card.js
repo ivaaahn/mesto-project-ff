@@ -1,63 +1,56 @@
-import {openModal} from "./modal";
+const cardTemplate = document.querySelector("#card-template").content.querySelector(".card")
 
+export const cardsList = [
+    {
+        name: "Архыз",
+        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/arkhyz.jpg",
+    },
+    {
+        name: "Челябинская область",
+        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/chelyabinsk-oblast.jpg",
+    },
+    {
+        name: "Иваново",
+        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/ivanovo.jpg",
+    },
+    {
+        name: "Камчатка",
+        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/kamchatka.jpg",
+    },
+    {
+        name: "Холмогорский район",
+        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/kholmogorsky-rayon.jpg",
+    },
+    {
+        name: "Байкал",
+        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/baikal.jpg",
+    }
+]
 
-function initCard(name, link, alt) {
-    const cardTemplateContent = document.querySelector("#card-template").content
-    const cardElement = cardTemplateContent.querySelector(".card").cloneNode(true)
-
-    // Заголовок
-    const cardTitleElement = cardElement.querySelector(".card__title")
-    cardTitleElement.textContent = alt
-
-    // Картинка
-    const cardImageElement = cardElement.querySelector(".card__image")
-    cardImageElement.src = link
-    cardImageElement.alt = name
-
-    return cardElement
-}
-
-
-function deleteCardCallback(evt) {
+export function deleteCardCallback(evt) {
     evt.target.closest(".card").remove()
 }
 
-function likeCardCallback(evt) {
+export function likeCardCallback(evt) {
     evt.target.classList.toggle("card__like-button_is-active")
 }
 
-function openCardCallback(evt) {
-    const targetElement = evt.target
-    const openCardPopupImageElement = document.querySelector(".popup__image")
-    const openCardPopupCaptionElement = document.querySelector(".popup__caption")
+export function createCard(name, src, openCardCallback, customLikeCardCallback, customDeleteCardCallback) {
+    const cardElement = cardTemplate.cloneNode(true)
 
-    openCardPopupImageElement.setAttribute("src", targetElement.getAttribute("src"))
-    openCardPopupImageElement.setAttribute("alt", targetElement.getAttribute("alt"))
-    openCardPopupCaptionElement.textContent = targetElement.getAttribute("alt")
-
-    const openCardPopup = document.querySelector(".popup_type_image")
-    openModal(openCardPopup)
-}
-
-export function createCard(name, link, alt, openCardCallback, likeCardCallback, deleteCardCallback) {
-    const cardElement = initCard(name, link, alt)
+    const cardTitleElement = cardElement.querySelector(".card__title")
+    cardTitleElement.textContent = name
 
     const cardImageElement = cardElement.querySelector(".card__image")
-    cardImageElement.addEventListener('click', openCardCallback)
+    cardImageElement.addEventListener('click', () => openCardCallback(name, src))
+    cardImageElement.src = src
+    cardImageElement.alt = name
 
     const cardLikeButtonElement = cardElement.querySelector(".card__like-button")
-    cardLikeButtonElement.addEventListener('click', likeCardCallback)
+    cardLikeButtonElement.addEventListener('click', customLikeCardCallback || likeCardCallback)
 
     const cardDeleteButtonElement = cardElement.querySelector(".card__delete-button")
-    cardDeleteButtonElement.addEventListener('click', deleteCardCallback)
+    cardDeleteButtonElement.addEventListener('click', customDeleteCardCallback || deleteCardCallback)
 
-    const placesListElement = document.querySelector(".places__list")
-    placesListElement.append(cardElement)
-}
-
-
-export function createCardBulk(cardsData) {
-    cardsData.map(cardData => createCard(
-        cardData.name, cardData.link, cardData.name, openCardCallback, likeCardCallback, deleteCardCallback
-    ))
+    return cardElement
 }

@@ -1,34 +1,32 @@
-// Модуль для упрощения работы с модалками
+const IS_OPENED_MODAL_CLASS = "popup_is-opened"
+const IS_MODAL_CLASS = "popup"
+const IS_CLOSE_MODAL_ICON = "popup__close"
+
+function closeModalByPressEscape(evt) {
+    if (evt.key === "Escape") {
+        closeModal(document.querySelector(".popup_is-opened"))
+    }
+}
+
+function closeModalByMouseDown(evt) {
+    const targetEvtClassList = evt.target.classList
+
+    // Клик по оверлею или по крестику приводит к закрытию
+    if (targetEvtClassList.contains(IS_MODAL_CLASS) || targetEvtClassList.contains(IS_CLOSE_MODAL_ICON)) {
+        closeModal(evt.currentTarget)
+    }
+}
 
 export function openModal(modalElement) {
-    // Открытие модалки сводится к добавлению класса popup_is-opened и навешиванию
-    // обработчиков нажатий на escape и кликов по оверлею. Также навешивается обработчик
-    // клика по крестику, закрывающему модалку
+    document.addEventListener('keydown', closeModalByPressEscape)
+    modalElement.addEventListener('mousedown', closeModalByMouseDown)
 
-    function hidePopupByPressEscape(evt) {
-        if (evt.key === "Escape") {
-            closeModal(modalElement)
-            document.removeEventListener('keydown', hidePopupByPressEscape)
-        }
-    }
-    document.addEventListener('keydown', hidePopupByPressEscape)
-
-
-    function hidePopupByClickOnOverlay(evt) {
-        if (evt.target.classList.contains("popup")) {
-            closeModal(modalElement)
-            document.removeEventListener('keydown', hidePopupByClickOnOverlay)
-        }
-    }
-    document.addEventListener('click', hidePopupByClickOnOverlay)
-
-    const closePopupItem = modalElement.querySelector(".popup__close")
-    closePopupItem.addEventListener('click', () => closeModal(modalElement))
-
-    modalElement.classList.add("popup_is-opened")
+    modalElement.classList.add(IS_OPENED_MODAL_CLASS)
 }
 
 export function closeModal(modalElement) {
-    // Скрытие модалки сводится к удалению класса popup_is-opened
-    modalElement.classList.remove("popup_is-opened")
+    document.removeEventListener('keydown', closeModalByPressEscape)
+    modalElement.removeEventListener('mousedown', closeModalByMouseDown)
+
+    modalElement.classList.remove(IS_OPENED_MODAL_CLASS)
 }
