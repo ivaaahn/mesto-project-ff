@@ -61,13 +61,13 @@ const profileEditModalFormNameInput = profileEditModalForm.querySelector(".popup
 const profileEditModalFormJobInput = profileEditModalForm.querySelector(".popup__input_type_description")
 
 
-function openProfileEditModalCallback() {
+function openProfileEditModal() {
     profileEditModalFormNameInput.value = profileName.textContent
     profileEditModalFormJobInput.value = profileJob.textContent
     openModal(profileEditModal)
 }
 
-function updateProfileCallback(evt) {
+function updateProfile(evt) {
     evt.preventDefault();
 
     profileName.textContent = profileEditModalFormNameInput.value
@@ -75,5 +75,5 @@ function updateProfileCallback(evt) {
     closeModal(profileEditModal)
 }
 
-profileEditButton.addEventListener('click', openProfileEditModalCallback)
-profileEditModalForm.addEventListener('submit', updateProfileCallback);
+profileEditButton.addEventListener('click', openProfileEditModal)
+profileEditModalForm.addEventListener('submit', updateProfile);
