@@ -2,7 +2,16 @@ import './styles/index.css';
 
 import {cardsList, createCard} from "./components/card";
 import {closeModal, openModal} from "./components/modal";
+import {clearValidation, enableValidation} from "./components/validation";
 
+const validationSettings = {
+    formSelector: '.popup__form',
+    inputSelector: '.popup__input',
+    submitButtonSelector: '.popup__button',
+    inactiveButtonClass: 'popup__button_disabled',
+    inputErrorClass: 'popup__input_type_error',
+    errorClass: 'popup__error_visible'
+}
 
 // Открытие карточки
 const cardsListElement = document.querySelector(".places__list")
@@ -33,6 +42,7 @@ function addCard(evt) {
 
     const card = createCard(cardAddModalFormTitleInput.value, cardAddModalFormUrlInput.value, openCardOpenModal)
     cardAddModalForm.reset()
+    clearValidation(cardAddModalForm, validationSettings)
 
     cardsListElement.prepend(card)
     closeModal(cardAddModal)
@@ -64,6 +74,7 @@ const profileEditModalFormJobInput = profileEditModalForm.querySelector(".popup_
 function openProfileEditModal() {
     profileEditModalFormNameInput.value = profileName.textContent
     profileEditModalFormJobInput.value = profileJob.textContent
+    clearValidation(profileEditModalForm, validationSettings)
     openModal(profileEditModal)
 }
 
@@ -77,3 +88,7 @@ function updateProfile(evt) {
 
 profileEditButton.addEventListener('click', openProfileEditModal)
 profileEditModalForm.addEventListener('submit', updateProfile);
+
+
+// Валидация форм
+enableValidation(validationSettings)
