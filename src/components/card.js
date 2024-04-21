@@ -1,56 +1,71 @@
+import {deleteCardFromServer, likeCardOnServer, unlikeCardOnServer} from "./api";
+
 const cardTemplate = document.querySelector("#card-template").content.querySelector(".card")
+const IS_ACTIVE_LIKE_BUTTON_CLASS = "card__like-button_is-active"
+const IS_HIDDEN_CARD_DELETE_BUTTON_CLASS = "card__delete-button-hidden"
 
-export const cardsList = [
-    {
-        name: "Архыз",
-        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/arkhyz.jpg",
-    },
-    {
-        name: "Челябинская область",
-        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/chelyabinsk-oblast.jpg",
-    },
-    {
-        name: "Иваново",
-        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/ivanovo.jpg",
-    },
-    {
-        name: "Камчатка",
-        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/kamchatka.jpg",
-    },
-    {
-        name: "Холмогорский район",
-        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/kholmogorsky-rayon.jpg",
-    },
-    {
-        name: "Байкал",
-        link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/baikal.jpg",
-    }
-]
-
-export function deleteCardCallback(evt) {
-    evt.target.closest(".card").remove()
+function logError(err) {
+    console.error(`Ошибка: ${err}`)
 }
 
-export function likeCardCallback(evt) {
-    evt.target.classList.toggle("card__like-button_is-active")
-}
-
-export function createCard(name, src, openCardCallback, customLikeCardCallback, customDeleteCardCallback) {
+export function createCard(cardData, currentUserId, openCardCallback, deleteCardCallback, likeCardCallback) {
     const cardElement = cardTemplate.cloneNode(true)
 
     const cardTitleElement = cardElement.querySelector(".card__title")
-    cardTitleElement.textContent = name
+    cardTitleElement.textContent = cardData.name
 
     const cardImageElement = cardElement.querySelector(".card__image")
-    cardImageElement.addEventListener('click', () => openCardCallback(name, src))
-    cardImageElement.src = src
-    cardImageElement.alt = name
+    cardImageElement.addEventListener('click', () => openCardCallback(cardData.name, cardData.link))
+    cardImageElement.src = cardData.link
+    cardImageElement.alt = cardData.name
+
+    const cardLikeCounterElement = cardElement.querySelector(".card__like-counter")
+    cardLikeCounterElement.textContent = cardData.likes.length
 
     const cardLikeButtonElement = cardElement.querySelector(".card__like-button")
-    cardLikeButtonElement.addEventListener('click', customLikeCardCallback || likeCardCallback)
+    cardLikeButtonElement.addEventListener('click', () =>
+        likeCardCallback(cardLikeButtonElement, cardLikeCounterElement, cardData._id)
+    )
+    // Отмечаем проставленный лайк текущего пользователя
+    if (cardData.likes.map(user => user._id).includes(currentUserId)) {
+        cardLikeButtonElement.classList.add(IS_ACTIVE_LIKE_BUTTON_CLASS)
+    }
 
     const cardDeleteButtonElement = cardElement.querySelector(".card__delete-button")
-    cardDeleteButtonElement.addEventListener('click', customDeleteCardCallback || deleteCardCallback)
+    // Отображаем кнопку удаления карточки только если она принадлежит текущему пользователю
+    if (cardData.owner._id === currentUserId) {
+        cardDeleteButtonElement.addEventListener('click', () =>
+            deleteCardCallback(cardElement.closest(".card"), cardData._id)
+        )
+    } else {
+        cardDeleteButtonElement.classList.add(IS_HIDDEN_CARD_DELETE_BUTTON_CLASS)
+    }
 
     return cardElement
+}
+
+export function deleteCard(cardToDelete, cardId) {
+    deleteCardFromServer(cardId)
+        .then(() => {
+            cardToDelete.remove()
+        })
+        .catch(logError);
+}
+
+export function likeCard(cardLikeElement, cardLikesCounterElement, cardId) {
+    if (cardLikeElement.classList.contains(IS_ACTIVE_LIKE_BUTTON_CLASS)) {
+        unlikeCardOnServer(cardId)
+            .then(res => {
+                cardLikeElement.classList.remove(IS_ACTIVE_LIKE_BUTTON_CLASS)
+                cardLikesCounterElement.textContent = res.likes.length
+            })
+            .catch(logError);
+    } else {
+        likeCardOnServer(cardId)
+            .then(res => {
+                cardLikeElement.classList.add(IS_ACTIVE_LIKE_BUTTON_CLASS)
+                cardLikesCounterElement.textContent = res.likes.length
+            })
+            .catch(logError);
+    }
 }

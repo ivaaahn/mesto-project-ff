@@ -2,6 +2,7 @@ const IS_OPENED_MODAL_CLASS = "popup_is-opened"
 const IS_MODAL_CLASS = "popup"
 const IS_CLOSE_MODAL_ICON = "popup__close"
 
+
 function closeModalByPressEscape(evt) {
     if (evt.key === "Escape") {
         closeModal(document.querySelector(".popup_is-opened"))
