@@ -1,6 +1,8 @@
 # Проектная работа Mesto
 
-[Ссылка на проект](https://github.com/ivaaahn/mesto-project-ff)
+[Ссылка на github](https://github.com/ivaaahn/mesto-project-ff)
+
+[Ссылка на развернутый проект](https://ivaaahn.github.io/mesto-project-ff/)
 
 ---
 **Функциональность:**
