@@ -40,7 +40,7 @@ function openProfileEditModal() {
     openModal(profileEditModal)
 }
 
-function syncProfileWithCurrentUser() {
+function synchronizeProfileWithCurrentUser() {
     profileName.textContent = currentUser.name
     profileJob.textContent = currentUser.job
     profileAvatar.style.backgroundImage = `url(${currentUser.avatar})`
@@ -60,7 +60,7 @@ function updateProfile(evt) {
     })
         .then((res) => {
             currentUser.initFromServer(res)
-            syncProfileWithCurrentUser()
+            synchronizeProfileWithCurrentUser()
             closeModal(profileEditModal)
         })
         .catch(console.log)
@@ -149,7 +149,7 @@ function changeAvatar(evt) {
             currentUser.initFromServer(res)
             closeModal(profileAvatarChangeModal)
         })
-        .then(syncProfileWithCurrentUser)
+        .then(synchronizeProfileWithCurrentUser)
         .catch(console.log)
         .finally(() => {
             submitButton.textContent = originalButtonText
@@ -164,7 +164,7 @@ profileAvatarChangeModalForm.addEventListener('submit', changeAvatar);
 Promise.all([fetchCurrentUser(), fetchCards()])
     .then(([userData, cardsData]) => {
         currentUser.initFromServer(userData)
-        syncProfileWithCurrentUser()
+        synchronizeProfileWithCurrentUser()
 
         cardsData.forEach((cardData) => {
             cardsListElement.prepend(createCard(cardData, currentUser.id, openCardOpenModal, deleteCard, likeCard))

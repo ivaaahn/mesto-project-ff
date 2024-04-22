@@ -1,12 +1,10 @@
 import {deleteCardFromServer, likeCardOnServer, unlikeCardOnServer} from "./api";
+import {logError} from "./utils";
 
 const cardTemplate = document.querySelector("#card-template").content.querySelector(".card")
 const IS_ACTIVE_LIKE_BUTTON_CLASS = "card__like-button_is-active"
 const IS_HIDDEN_CARD_DELETE_BUTTON_CLASS = "card__delete-button-hidden"
 
-function logError(err) {
-    console.error(`Ошибка: ${err}`)
-}
 
 export function createCard(cardData, currentUserId, openCardCallback, deleteCardCallback, likeCardCallback) {
     const cardElement = cardTemplate.cloneNode(true)
@@ -35,7 +33,7 @@ export function createCard(cardData, currentUserId, openCardCallback, deleteCard
     // Отображаем кнопку удаления карточки только если она принадлежит текущему пользователю
     if (cardData.owner._id === currentUserId) {
         cardDeleteButtonElement.addEventListener('click', () =>
-            deleteCardCallback(cardElement.closest(".card"), cardData._id)
+            deleteCardCallback(cardElement, cardData._id)
         )
     } else {
         cardDeleteButtonElement.classList.add(IS_HIDDEN_CARD_DELETE_BUTTON_CLASS)
