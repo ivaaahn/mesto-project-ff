@@ -1,9 +1,10 @@
 import './styles/index.css';
 
-import {createCard, deleteCard, likeCard} from "./components/card";
+import * as cardUi from "./components/card";
+import * as api from "./components/api";
 import {closeModal, openModal} from "./components/modal";
 import {clearValidation, enableValidation} from "./components/validation";
-import {addCardToServer, fetchCards, fetchCurrentUser, updateAvatarOnServer, updateCurrentUser} from "./components/api";
+import {logError} from "./components/utils";
 
 const BUTTON_LOADER_TEXT = "Сохранение...";
 
@@ -54,7 +55,7 @@ function updateProfile(evt) {
 
     submitButton.textContent = BUTTON_LOADER_TEXT
 
-    updateCurrentUser({
+    api.updateCurrentUser({
         name: profileEditModalFormNameInput.value,
         about: profileEditModalFormJobInput.value
     })
@@ -86,11 +87,29 @@ const cardAddModalForm = cardAddModal.querySelector(".popup__form")
 const cardAddModalFormTitleInput = cardAddModalForm.querySelector(".popup__input_type_card-name")
 const cardAddModalFormUrlInput = cardAddModalForm.querySelector(".popup__input_type_url")
 
-function openCardOpenModal(name, src) {
-    cardOpenModalImage.src = src
-    cardOpenModalImage.alt = name
-    cardOpenModalCaption.textContent = name
+function openCard(cardData) {
+    cardOpenModalImage.src = cardData.link
+    cardOpenModalImage.alt = cardData.name
+    cardOpenModalCaption.textContent = cardData.name
     openModal(cardOpenModal)
+}
+
+function deleteCard(cardData, cardElement) {
+    api.deleteCardFromServer(cardData._id)
+        .then(() => {
+            cardUi.remove(cardElement)
+        })
+        .catch(logError);
+}
+
+function likeCard(cardData, cardElement) {
+    const cardLikeApiHandler = cardUi.isLiked(cardElement) ? api.unlikeCardOnServer : api.likeCardOnServer;
+
+    cardLikeApiHandler(cardData._id)
+        .then((res) => {
+            cardUi.toggleLike(cardElement, res.likes.length)
+        })
+        .catch(logError);
 }
 
 function openCardAddModal() {
@@ -105,13 +124,13 @@ function addCard(evt) {
 
     submitButton.textContent = BUTTON_LOADER_TEXT
 
-    addCardToServer(cardAddModalFormTitleInput.value, cardAddModalFormUrlInput.value)
+    api.addCardToServer(cardAddModalFormTitleInput.value, cardAddModalFormUrlInput.value)
         .then((cardData) => {
             cardAddModalForm.reset()
             clearValidation(cardAddModalForm)
 
             cardsListElement.prepend(
-                createCard(cardData, currentUser.id, openCardOpenModal, deleteCard, likeCard)
+                cardUi.create(cardData, currentUser.id, openCard, deleteCard, likeCard)
             )
             closeModal(cardAddModal)
         })
@@ -144,7 +163,7 @@ function changeAvatar(evt) {
 
     submitButton.textContent = BUTTON_LOADER_TEXT
 
-    updateAvatarOnServer(profileAvatarChangeModalFormUrlInput.value)
+    api.updateAvatarOnServer(profileAvatarChangeModalFormUrlInput.value)
         .then((res) => {
             currentUser.initFromServer(res)
             closeModal(profileAvatarChangeModal)
@@ -161,13 +180,13 @@ profileAvatarChangeModalForm.addEventListener('submit', changeAvatar);
 
 
 // Инициализация данных
-Promise.all([fetchCurrentUser(), fetchCards()])
+Promise.all([api.fetchCurrentUser(), api.fetchCards()])
     .then(([userData, cardsData]) => {
         currentUser.initFromServer(userData)
         synchronizeProfileWithCurrentUser()
 
         cardsData.forEach((cardData) => {
-            cardsListElement.prepend(createCard(cardData, currentUser.id, openCardOpenModal, deleteCard, likeCard))
+            cardsListElement.append(cardUi.create(cardData, currentUser.id, openCard, deleteCard, likeCard))
         })
     })
     .catch(console.log)
